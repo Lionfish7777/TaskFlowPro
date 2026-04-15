@@ -1,0 +1,1526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TaskFlow Pro — Dashboard</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --primary-light: #eef2ff;
+      --success: #10b981;
+      --success-light: #d1fae5;
+      --warning: #f59e0b;
+      --warning-light: #fef3c7;
+      --danger: #ef4444;
+      --danger-light: #fee2e2;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --surface: #ffffff;
+      --bg: #f8fafc;
+      --sidebar-bg: #1e1b4b;
+      --sidebar-text: #c7d2fe;
+      --sidebar-active: #6366f1;
+      --radius: 10px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── FLOW STATE ── */
+    body.flow-state .sidebar,
+    body.flow-state .topbar,
+    body.flow-state .stats-bar,
+    body.flow-state .page-header,
+    body.flow-state .focus-section,
+    body.flow-state .add-task-section,
+    body.flow-state .task-list-header,
+    body.flow-state #allTasksList .task-card:not(.flow-current) {
+      display: none !important;
+    }
+
+    body.flow-state { background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); }
+    body.flow-state .main-content { margin-left: 0 !important; }
+    body.flow-state #flowStateOverlay { display: flex !important; }
+
+    /* ── HEADER ── */
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      z-index: 100;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 17px;
+      color: var(--text);
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--primary), #8b5cf6);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .pro-badge {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .user-email {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .btn-upgrade {
+      background: linear-gradient(135deg, var(--primary), #8b5cf6);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .btn-upgrade:hover { opacity: 0.88; }
+
+    .btn-logout {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-size: 13px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-logout:hover { background: var(--bg); color: var(--text); }
+
+    /* ── LAYOUT ── */
+    .app-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 240px;
+      background: var(--sidebar-bg);
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      padding: 20px 0;
+    }
+
+    .sidebar-section-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #6366f1;
+      padding: 0 20px 8px;
+      margin-top: 8px;
+    }
+
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 0;
+      transition: background 0.15s;
+      font-size: 14px;
+      color: var(--sidebar-text);
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+    }
+
+    .sidebar-item:hover { background: rgba(99,102,241,0.15); }
+
+    .sidebar-item.active {
+      background: rgba(99,102,241,0.25);
+      color: white;
+      border-left: 3px solid var(--primary);
+    }
+
+    .project-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .sidebar-item .item-name {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .delete-project-btn {
+      opacity: 0;
+      font-size: 14px;
+      color: #94a3b8;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 2px 4px;
+      border-radius: 4px;
+      transition: opacity 0.15s, color 0.15s;
+      flex-shrink: 0;
+    }
+
+    .sidebar-item:hover .delete-project-btn { opacity: 1; }
+    .delete-project-btn:hover { color: var(--danger); }
+
+    .add-project-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      color: #94a3b8;
+      font-size: 13px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      width: 100%;
+      transition: color 0.15s;
+    }
+
+    .add-project-btn:hover { color: white; }
+
+    .free-limit-notice {
+      margin: 12px 16px;
+      background: rgba(239,68,68,0.15);
+      border: 1px solid rgba(239,68,68,0.3);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 12px;
+      color: #fca5a5;
+      line-height: 1.5;
+    }
+
+    .free-limit-notice a {
+      color: #f87171;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    /* ── MAIN CONTENT ── */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── STATS BAR ── */
+    .stats-bar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 28px;
+      display: flex;
+      gap: 32px;
+      flex-shrink: 0;
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stat-icon {
+      font-size: 18px;
+    }
+
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* ── SCROLLABLE CONTENT ── */
+    .content-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 28px;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .page-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .page-subtitle {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .btn-flow-state {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(135deg, #1e1b4b, #312e81);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .btn-flow-state:hover { opacity: 0.85; }
+
+    /* ── FOCUS SECTION ── */
+    .focus-section {
+      margin-bottom: 28px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .focus-cards {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .focus-card {
+      flex: 1;
+      min-width: 200px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+      position: relative;
+      transition: box-shadow 0.15s;
+    }
+
+    .focus-card:hover { box-shadow: var(--shadow-md); }
+
+    .focus-card.overdue { border-left: 3px solid var(--danger); }
+    .focus-card.due-today { border-left: 3px solid var(--warning); }
+    .focus-card.high-priority { border-left: 3px solid var(--primary); }
+
+    .focus-card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+
+    .focus-card-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .focus-complete-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      transition: all 0.15s;
+      color: transparent;
+    }
+
+    .focus-complete-btn:hover {
+      border-color: var(--success);
+      background: var(--success-light);
+      color: var(--success);
+    }
+
+    .focus-empty {
+      background: var(--surface);
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* ── ADD TASK ── */
+    .add-task-section {
+      margin-bottom: 24px;
+    }
+
+    .add-task-form {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .add-task-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .add-task-row input[type="text"] {
+      flex: 1;
+      padding: 10px 14px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .add-task-row input[type="text"]:focus { border-color: var(--primary); }
+
+    .add-task-meta {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .add-task-meta select,
+    .add-task-meta input[type="date"] {
+      padding: 8px 12px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+      outline: none;
+      background: var(--bg);
+      color: var(--text);
+      transition: border-color 0.2s;
+    }
+
+    .add-task-meta select:focus,
+    .add-task-meta input[type="date"]:focus { border-color: var(--primary); }
+
+    .btn-add-task {
+      padding: 9px 20px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn-add-task:hover { background: var(--primary-dark); }
+
+    /* ── TASK LIST ── */
+    .task-list-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .task-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      box-shadow: var(--shadow);
+      transition: box-shadow 0.15s, opacity 0.3s;
+      position: relative;
+    }
+
+    .task-card:hover { box-shadow: var(--shadow-md); }
+
+    .task-card.completing {
+      opacity: 0.5;
+      transform: scale(0.99);
+    }
+
+    .task-checkbox {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      cursor: pointer;
+      flex-shrink: 0;
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+      background: none;
+    }
+
+    .task-checkbox:hover {
+      border-color: var(--success);
+      background: var(--success-light);
+    }
+
+    .task-checkbox.checked {
+      border-color: var(--success);
+      background: var(--success);
+      color: white;
+    }
+
+    .task-body { flex: 1; min-width: 0; }
+
+    .task-title {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1.4;
+      margin-bottom: 4px;
+    }
+
+    .task-card.completed .task-title {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+
+    .task-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .priority-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .priority-badge.high { background: #fee2e2; color: #dc2626; }
+    .priority-badge.medium { background: #fef3c7; color: #d97706; }
+    .priority-badge.low { background: #f0fdf4; color: #16a34a; }
+
+    .due-tag {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .due-tag.overdue { color: var(--danger); font-weight: 600; }
+    .due-tag.today { color: var(--warning); font-weight: 600; }
+
+    .project-tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 500;
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .task-delete-btn {
+      opacity: 0;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      padding: 4px 6px;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: opacity 0.15s, color 0.15s, background 0.15s;
+      flex-shrink: 0;
+    }
+
+    .task-card:hover .task-delete-btn { opacity: 1; }
+    .task-delete-btn:hover { color: var(--danger); background: var(--danger-light); }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--text-muted);
+    }
+
+    .empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
+    .empty-state h3 { font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+    .empty-state p { font-size: 14px; line-height: 1.6; }
+
+    /* ── CELEBRATION ── */
+    .celebration-toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: linear-gradient(135deg, var(--success), #059669);
+      color: white;
+      padding: 14px 24px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      box-shadow: 0 8px 24px rgba(16,185,129,0.4);
+      transition: transform 0.3s ease;
+      z-index: 1000;
+      white-space: nowrap;
+    }
+
+    .celebration-toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ── UPGRADE MODAL ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.show { display: flex; }
+
+    .modal {
+      background: var(--surface);
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 480px;
+      width: 100%;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+
+    .modal-icon { font-size: 48px; margin-bottom: 16px; }
+    .modal h2 { font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
+    .modal p { font-size: 15px; color: var(--text-muted); line-height: 1.6; margin-bottom: 24px; }
+
+    .modal-features {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 28px;
+      text-align: left;
+    }
+
+    .modal-feature {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text);
+      background: var(--bg);
+      padding: 8px 12px;
+      border-radius: 8px;
+    }
+
+    .modal-feature .check { color: var(--success); font-weight: 700; }
+
+    .modal-price {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+
+    .modal-price span { font-size: 16px; color: var(--text-muted); font-weight: 400; }
+
+    .btn-modal-upgrade {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--primary), #8b5cf6);
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-bottom: 12px;
+      transition: opacity 0.2s;
+    }
+
+    .btn-modal-upgrade:hover { opacity: 0.9; }
+
+    .btn-modal-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .btn-modal-close:hover { color: var(--text); }
+
+    /* ── FLOW STATE OVERLAY ── */
+    #flowStateOverlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 40px;
+    }
+
+    .flow-header {
+      color: rgba(255,255,255,0.6);
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+    }
+
+    .flow-task-display {
+      text-align: center;
+      max-width: 600px;
+    }
+
+    .flow-task-title {
+      font-size: 36px;
+      font-weight: 700;
+      color: white;
+      line-height: 1.3;
+      margin-bottom: 16px;
+    }
+
+    .flow-task-meta {
+      font-size: 15px;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 40px;
+    }
+
+    .flow-actions {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+    }
+
+    .btn-flow-complete {
+      padding: 14px 32px;
+      background: var(--success);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .btn-flow-complete:hover { opacity: 0.85; }
+
+    .btn-flow-skip {
+      padding: 14px 24px;
+      background: rgba(255,255,255,0.15);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 12px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-flow-skip:hover { background: rgba(255,255,255,0.25); }
+
+    .btn-flow-exit {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      padding: 10px 18px;
+      background: rgba(255,255,255,0.15);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 10px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-flow-exit:hover { background: rgba(255,255,255,0.25); }
+
+    .flow-progress {
+      color: rgba(255,255,255,0.5);
+      font-size: 14px;
+      margin-top: 28px;
+    }
+
+    /* ── NEW PROJECT FORM ── */
+    .new-project-form {
+      padding: 12px 16px;
+      display: none;
+    }
+
+    .new-project-form.show { display: block; }
+
+    .new-project-form input {
+      width: 100%;
+      padding: 8px 12px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      color: white;
+      font-size: 13px;
+      outline: none;
+      margin-bottom: 8px;
+    }
+
+    .new-project-form input::placeholder { color: rgba(255,255,255,0.4); }
+
+    .new-project-colors {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .color-dot {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform 0.15s;
+    }
+
+    .color-dot.selected { border-color: white; transform: scale(1.2); }
+
+    .new-project-btns { display: flex; gap: 6px; }
+
+    .btn-save-project, .btn-cancel-project {
+      flex: 1;
+      padding: 6px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: opacity 0.15s;
+    }
+
+    .btn-save-project { background: var(--primary); color: white; }
+    .btn-cancel-project { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .stats-bar { gap: 16px; padding: 12px 16px; overflow-x: auto; }
+      .content-scroll { padding: 20px 16px; }
+      .focus-card { min-width: 150px; }
+      .add-task-meta { flex-wrap: wrap; }
+      .modal-features { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="logo">
+        <div class="logo-icon">⚡</div>
+        TaskFlow Pro
+      </div>
+    </div>
+    <div class="topbar-right">
+      <span id="proBadge" class="pro-badge" style="display:none">PRO</span>
+      <span class="user-email" id="userEmail"></span>
+      <button class="btn-upgrade" id="upgradeBtn" onclick="showUpgradeModal()">Upgrade to Pro</button>
+      <a href="/auth/logout"><button class="btn-logout">Sign Out</button></a>
+    </div>
+  </div>
+
+  <div class="app-body">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sidebar-section-label">Navigation</div>
+      <button class="sidebar-item active" id="allTasksBtn" onclick="selectProject(null)">
+        <span>📋</span>
+        <span class="item-name">All Tasks</span>
+      </button>
+
+      <div class="sidebar-section-label" style="margin-top:12px">Projects</div>
+      <div id="projectList"></div>
+
+      <div class="new-project-form" id="newProjectForm">
+        <input type="text" id="newProjectName" placeholder="Project name..." maxlength="40" />
+        <div class="new-project-colors" id="colorPicker">
+          <div class="color-dot selected" style="background:#6366f1" data-color="#6366f1" onclick="selectColor(this)"></div>
+          <div class="color-dot" style="background:#10b981" data-color="#10b981" onclick="selectColor(this)"></div>
+          <div class="color-dot" style="background:#f59e0b" data-color="#f59e0b" onclick="selectColor(this)"></div>
+          <div class="color-dot" style="background:#ef4444" data-color="#ef4444" onclick="selectColor(this)"></div>
+          <div class="color-dot" style="background:#8b5cf6" data-color="#8b5cf6" onclick="selectColor(this)"></div>
+          <div class="color-dot" style="background:#06b6d4" data-color="#06b6d4" onclick="selectColor(this)"></div>
+        </div>
+        <div class="new-project-btns">
+          <button class="btn-save-project" onclick="saveProject()">Add</button>
+          <button class="btn-cancel-project" onclick="cancelNewProject()">Cancel</button>
+        </div>
+      </div>
+
+      <button class="add-project-btn" id="addProjectBtn" onclick="showNewProjectForm()">
+        <span>+</span> New Project
+      </button>
+
+      <div class="free-limit-notice" id="freeLimitNotice" style="display:none">
+        You're using <strong id="projectLimitCount">3/3</strong> free projects.
+        <a onclick="showUpgradeModal()">Upgrade for unlimited →</a>
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+
+      <!-- STATS BAR -->
+      <div class="stats-bar">
+        <div class="stat-item">
+          <span class="stat-icon">✅</span>
+          <div>
+            <div class="stat-value" id="completedTodayStat">0</div>
+            <div class="stat-label">Done today</div>
+          </div>
+        </div>
+        <div class="stat-item">
+          <span class="stat-icon">🔥</span>
+          <div>
+            <div class="stat-value" id="streakStat">0</div>
+            <div class="stat-label">Day streak</div>
+          </div>
+        </div>
+        <div class="stat-item">
+          <span class="stat-icon">📋</span>
+          <div>
+            <div class="stat-value" id="activeStat">0</div>
+            <div class="stat-label">Active tasks</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCROLLABLE CONTENT -->
+      <div class="content-scroll">
+        <div class="page-header">
+          <div>
+            <div class="page-title" id="pageTitle">All Tasks</div>
+            <div class="page-subtitle" id="pageSubtitle"></div>
+          </div>
+          <button class="btn-flow-state" id="flowStateBtn" onclick="enterFlowState()">
+            ⚡ Flow State
+          </button>
+        </div>
+
+        <!-- DAILY FOCUS -->
+        <div class="focus-section" id="focusSection">
+          <div class="section-title">🎯 Daily Focus — Your Top 3</div>
+          <div class="focus-cards" id="focusCards">
+            <div class="focus-empty">Loading your focus tasks...</div>
+          </div>
+        </div>
+
+        <!-- ADD TASK -->
+        <div class="add-task-section">
+          <div class="section-title">+ Add Task</div>
+          <div class="add-task-form">
+            <div class="add-task-row">
+              <input type="text" id="newTaskTitle" placeholder="What needs to get done?" maxlength="200"
+                onkeydown="if(event.key==='Enter') addTask()" />
+              <button class="btn-add-task" onclick="addTask()">Add Task</button>
+            </div>
+            <div class="add-task-meta">
+              <select id="taskPriority">
+                <option value="medium">⚡ Medium Priority</option>
+                <option value="high">🔴 High Priority</option>
+                <option value="low">🟢 Low Priority</option>
+              </select>
+              <input type="date" id="taskDueDate" />
+              <select id="taskProject">
+                <option value="">No Project</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- TASK LIST -->
+        <div>
+          <div class="task-list-header">
+            <div class="section-title" id="taskListTitle">All Active Tasks</div>
+          </div>
+          <div id="allTasksList">
+            <div class="empty-state">
+              <div class="empty-icon">📋</div>
+              <h3>No tasks yet</h3>
+              <p>Add your first task above and let's get things moving.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOW STATE OVERLAY -->
+  <div id="flowStateOverlay">
+    <button class="btn-flow-exit" onclick="exitFlowState()">✕ Exit Flow State</button>
+    <div class="flow-header">⚡ FLOW STATE</div>
+    <div class="flow-task-display">
+      <div class="flow-task-title" id="flowTaskTitle">Loading...</div>
+      <div class="flow-task-meta" id="flowTaskMeta"></div>
+      <div class="flow-actions">
+        <button class="btn-flow-complete" id="flowCompleteBtn" onclick="completeFlowTask()">✓ Done</button>
+        <button class="btn-flow-skip" onclick="skipFlowTask()">→ Next</button>
+      </div>
+      <div class="flow-progress" id="flowProgress"></div>
+    </div>
+  </div>
+
+  <!-- UPGRADE MODAL -->
+  <div class="modal-overlay" id="upgradeModal">
+    <div class="modal">
+      <div class="modal-icon">⚡</div>
+      <h2>Unlock TaskFlow Pro</h2>
+      <p>Take your productivity to the next level with unlimited power.</p>
+      <div class="modal-features">
+        <div class="modal-feature"><span class="check">✓</span> Unlimited Projects</div>
+        <div class="modal-feature"><span class="check">✓</span> Unlimited Tasks</div>
+        <div class="modal-feature"><span class="check">✓</span> Flow State Mode</div>
+        <div class="modal-feature"><span class="check">✓</span> Streak Analytics</div>
+        <div class="modal-feature"><span class="check">✓</span> Priority Support</div>
+        <div class="modal-feature"><span class="check">✓</span> Advanced Reports</div>
+      </div>
+      <div class="modal-price">$9.99<span>/month</span></div>
+      <p style="font-size:12px;margin-bottom:16px">30-day money-back guarantee. Cancel anytime.</p>
+      <button class="btn-modal-upgrade" onclick="startCheckout()">Upgrade Now →</button>
+      <button class="btn-modal-close" onclick="closeUpgradeModal()">Maybe later</button>
+    </div>
+  </div>
+
+  <!-- CELEBRATION TOAST -->
+  <div class="celebration-toast" id="celebrationToast"></div>
+
+  <script>
+    // ─── STATE ─────────────────────────────────────────────────────────────
+
+    let user = null;
+    let projects = [];
+    let tasks = [];
+    let focusTasks = [];
+    let selectedProjectId = null;
+    let selectedColor = '#6366f1';
+    let flowTaskIndex = 0;
+    let flowTasks = [];
+
+    const CELEBRATION_MESSAGES = [
+      '✅ Task complete! Keep the momentum going.',
+      '🔥 Done! You\'re on fire.',
+      '⚡ Crushed it. What\'s next?',
+      '✓ One down. The butler is proud.',
+      '🎯 Nailed it. Flow state achieved.',
+      '✅ That\'s the energy. Keep going.',
+    ];
+
+    // ─── INIT ──────────────────────────────────────────────────────────────
+
+    async function init() {
+      await loadUser();
+      await Promise.all([loadProjects(), loadFocusTasks(), loadStats()]);
+      await loadTasks();
+      renderGreeting();
+    }
+
+    async function loadUser() {
+      try {
+        const res = await fetch('/auth/me');
+        if (!res.ok) { window.location.href = '/login'; return; }
+        user = await res.json();
+        document.getElementById('userEmail').textContent = user.email;
+
+        if (user.isPro) {
+          document.getElementById('proBadge').style.display = 'inline';
+          document.getElementById('upgradeBtn').style.display = 'none';
+          document.getElementById('flowStateBtn').style.display = 'flex';
+        } else {
+          document.getElementById('flowStateBtn').style.display = 'none';
+        }
+      } catch (e) {
+        window.location.href = '/login';
+      }
+    }
+
+    async function loadStats() {
+      try {
+        const res = await fetch('/tasks/stats');
+        const stats = await res.json();
+        document.getElementById('completedTodayStat').textContent = stats.completedToday;
+        document.getElementById('streakStat').textContent = stats.streakCount;
+        document.getElementById('activeStat').textContent = stats.totalActive;
+      } catch (e) {}
+    }
+
+    function renderGreeting() {
+      const hour = new Date().getHours();
+      let greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+      const taskCount = tasks.filter(t => t.status === 'active').length;
+      const subtitle = taskCount === 0
+        ? `${greeting}. Your slate is clean — add your first task.`
+        : `${greeting}. You have ${taskCount} active task${taskCount !== 1 ? 's' : ''}.`;
+      document.getElementById('pageSubtitle').textContent = subtitle;
+    }
+
+    // ─── PROJECTS ──────────────────────────────────────────────────────────
+
+    async function loadProjects() {
+      try {
+        const res = await fetch('/projects');
+        projects = await res.json();
+        renderProjects();
+        renderProjectDropdown();
+      } catch (e) {}
+    }
+
+    function renderProjects() {
+      const list = document.getElementById('projectList');
+      list.innerHTML = '';
+
+      projects.forEach(p => {
+        const btn = document.createElement('button');
+        btn.className = 'sidebar-item' + (selectedProjectId === p.id ? ' active' : '');
+        btn.innerHTML = `
+          <div class="project-dot" style="background:${p.color}"></div>
+          <span class="item-name">${escapeHtml(p.name)}</span>
+          <button class="delete-project-btn" onclick="deleteProject(event, ${p.id})" title="Delete project">✕</button>
+        `;
+        btn.onclick = (e) => {
+          if (e.target.classList.contains('delete-project-btn')) return;
+          selectProject(p.id);
+        };
+        list.appendChild(btn);
+      });
+
+      // Free limit notice
+      if (!user?.isPro && projects.length >= 3) {
+        document.getElementById('freeLimitNotice').style.display = 'block';
+        document.getElementById('projectLimitCount').textContent = `${projects.length}/3`;
+        document.getElementById('addProjectBtn').style.display = 'none';
+      } else {
+        document.getElementById('freeLimitNotice').style.display = 'none';
+        document.getElementById('addProjectBtn').style.display = 'flex';
+      }
+    }
+
+    function renderProjectDropdown() {
+      const sel = document.getElementById('taskProject');
+      sel.innerHTML = '<option value="">No Project</option>';
+      projects.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = p.name;
+        sel.appendChild(opt);
+      });
+      if (selectedProjectId) sel.value = selectedProjectId;
+    }
+
+    function selectProject(id) {
+      selectedProjectId = id;
+      document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+      if (id === null) {
+        document.getElementById('allTasksBtn').classList.add('active');
+        document.getElementById('pageTitle').textContent = 'All Tasks';
+        document.getElementById('focusSection').style.display = 'block';
+        document.getElementById('taskListTitle').textContent = 'All Active Tasks';
+      } else {
+        const project = projects.find(p => p.id === id);
+        document.getElementById('pageTitle').textContent = project?.name || 'Project';
+        document.getElementById('focusSection').style.display = 'none';
+        document.getElementById('taskListTitle').textContent = `${project?.name || 'Project'} Tasks`;
+      }
+      loadTasks();
+    }
+
+    function showNewProjectForm() {
+      document.getElementById('newProjectForm').classList.add('show');
+      document.getElementById('addProjectBtn').style.display = 'none';
+      document.getElementById('newProjectName').focus();
+    }
+
+    function cancelNewProject() {
+      document.getElementById('newProjectForm').classList.remove('show');
+      document.getElementById('newProjectName').value = '';
+      if (!user?.isPro && projects.length >= 3) return;
+      document.getElementById('addProjectBtn').style.display = 'flex';
+    }
+
+    function selectColor(el) {
+      document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedColor = el.dataset.color;
+    }
+
+    async function saveProject() {
+      const name = document.getElementById('newProjectName').value.trim();
+      if (!name) return;
+
+      const res = await fetch('/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, color: selectedColor })
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        cancelNewProject();
+        await loadProjects();
+        renderProjectDropdown();
+      } else if (data.upgrade) {
+        cancelNewProject();
+        showUpgradeModal();
+      } else {
+        alert(data.error || 'Could not create project.');
+      }
+    }
+
+    async function deleteProject(e, id) {
+      e.stopPropagation();
+      if (!confirm('Delete this project? Tasks will not be deleted.')) return;
+      await fetch(`/projects/${id}`, { method: 'DELETE' });
+      if (selectedProjectId === id) selectProject(null);
+      await loadProjects();
+      await loadTasks();
+    }
+
+    // ─── TASKS ─────────────────────────────────────────────────────────────
+
+    async function loadTasks() {
+      try {
+        const url = selectedProjectId ? `/tasks?projectId=${selectedProjectId}` : '/tasks';
+        const res = await fetch(url);
+        tasks = await res.json();
+        renderTasks();
+      } catch (e) {}
+    }
+
+    async function loadFocusTasks() {
+      try {
+        const res = await fetch('/tasks/focus');
+        focusTasks = await res.json();
+        renderFocusCards();
+      } catch (e) {}
+    }
+
+    function renderFocusCards() {
+      const container = document.getElementById('focusCards');
+      if (!focusTasks.length) {
+        container.innerHTML = '<div class="focus-empty">🎉 Nothing urgent — you\'re ahead of the game.</div>';
+        return;
+      }
+
+      container.innerHTML = focusTasks.map(t => {
+        const today = new Date().toISOString().split('T')[0];
+        let cardClass = '';
+        if (t.due_date && t.due_date < today) cardClass = 'overdue';
+        else if (t.due_date === today) cardClass = 'due-today';
+        else if (t.priority === 'high') cardClass = 'high-priority';
+
+        const dueMeta = t.due_date
+          ? `📅 ${t.due_date < today ? 'Overdue: ' : ''}${formatDate(t.due_date)}`
+          : t.priority === 'high' ? '🔴 High priority' : '';
+
+        return `
+          <div class="focus-card ${cardClass}">
+            <div class="focus-card-title">${escapeHtml(t.title)}</div>
+            <div class="focus-card-meta">
+              ${dueMeta}
+              ${t.project_name ? `· ${escapeHtml(t.project_name)}` : ''}
+            </div>
+            <button class="focus-complete-btn" onclick="completeTask(${t.id})" title="Mark complete">✓</button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderTasks() {
+      const container = document.getElementById('allTasksList');
+      const activeTasks = tasks.filter(t => t.status === 'active');
+
+      if (!activeTasks.length) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">✅</div>
+            <h3>${selectedProjectId ? 'No tasks in this project' : 'All clear'}</h3>
+            <p>${selectedProjectId ? 'Add a task above to get started.' : 'Add your next task and keep the flow going.'}</p>
+          </div>`;
+        return;
+      }
+
+      const today = new Date().toISOString().split('T')[0];
+      container.innerHTML = activeTasks.map(t => {
+        let dueClass = '';
+        let dueLabel = '';
+        if (t.due_date) {
+          if (t.due_date < today) { dueClass = 'overdue'; dueLabel = `⚠️ Overdue · ${formatDate(t.due_date)}`; }
+          else if (t.due_date === today) { dueClass = 'today'; dueLabel = `📅 Due today`; }
+          else dueLabel = `📅 ${formatDate(t.due_date)}`;
+        }
+
+        return `
+          <div class="task-card" id="task-${t.id}">
+            <button class="task-checkbox" onclick="completeTask(${t.id})" title="Mark complete"></button>
+            <div class="task-body">
+              <div class="task-title">${escapeHtml(t.title)}</div>
+              <div class="task-meta">
+                <span class="priority-badge ${t.priority}">${t.priority}</span>
+                ${dueLabel ? `<span class="due-tag ${dueClass}">${dueLabel}</span>` : ''}
+                ${t.project_name ? `<span class="project-tag" style="background:${t.project_color}20;color:${t.project_color}">${escapeHtml(t.project_name)}</span>` : ''}
+              </div>
+            </div>
+            <button class="task-delete-btn" onclick="deleteTask(${t.id})" title="Delete task">🗑</button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function addTask() {
+      const title = document.getElementById('newTaskTitle').value.trim();
+      if (!title) return;
+
+      const priority = document.getElementById('taskPriority').value;
+      const dueDate = document.getElementById('taskDueDate').value;
+      const projectId = document.getElementById('taskProject').value;
+
+      const res = await fetch('/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, priority, dueDate: dueDate || null, projectId: projectId || null })
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        document.getElementById('newTaskTitle').value = '';
+        document.getElementById('taskDueDate').value = '';
+        await Promise.all([loadTasks(), loadFocusTasks(), loadStats()]);
+      } else if (data.upgrade) {
+        showUpgradeModal();
+      } else {
+        alert(data.error || 'Could not add task.');
+      }
+    }
+
+    async function completeTask(id) {
+      const card = document.getElementById(`task-${id}`);
+      if (card) card.classList.add('completing');
+
+      const res = await fetch(`/tasks/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'completed' })
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        const msg = CELEBRATION_MESSAGES[Math.floor(Math.random() * CELEBRATION_MESSAGES.length)];
+        showCelebration(msg + (data.streakCount > 1 ? ` 🔥 ${data.streakCount} day streak!` : ''));
+        await Promise.all([loadTasks(), loadFocusTasks(), loadStats()]);
+      }
+    }
+
+    async function deleteTask(id) {
+      await fetch(`/tasks/${id}`, { method: 'DELETE' });
+      await Promise.all([loadTasks(), loadFocusTasks(), loadStats()]);
+    }
+
+    // ─── FLOW STATE ────────────────────────────────────────────────────────
+
+    function enterFlowState() {
+      if (!user?.isPro) { showUpgradeModal(); return; }
+      flowTasks = tasks.filter(t => t.status === 'active');
+      if (!flowTasks.length) {
+        showCelebration('🎉 No active tasks! You\'re completely clear.');
+        return;
+      }
+      flowTaskIndex = 0;
+      document.body.classList.add('flow-state');
+      renderFlowTask();
+    }
+
+    function exitFlowState() {
+      document.body.classList.remove('flow-state');
+    }
+
+    function renderFlowTask() {
+      const task = flowTasks[flowTaskIndex];
+      if (!task) { exitFlowState(); return; }
+      document.getElementById('flowTaskTitle').textContent = task.title;
+      const meta = [
+        task.priority !== 'medium' ? task.priority + ' priority' : null,
+        task.due_date ? `Due ${formatDate(task.due_date)}` : null,
+        task.project_name ? task.project_name : null
+      ].filter(Boolean).join(' · ');
+      document.getElementById('flowTaskMeta').textContent = meta;
+      document.getElementById('flowCompleteBtn').dataset.taskId = task.id;
+      document.getElementById('flowProgress').textContent =
+        `Task ${flowTaskIndex + 1} of ${flowTasks.length}`;
+    }
+
+    async function completeFlowTask() {
+      const id = parseInt(document.getElementById('flowCompleteBtn').dataset.taskId);
+      await completeTask(id);
+      flowTasks = flowTasks.filter(t => t.id !== id);
+      if (!flowTasks.length) { exitFlowState(); return; }
+      if (flowTaskIndex >= flowTasks.length) flowTaskIndex = flowTasks.length - 1;
+      renderFlowTask();
+    }
+
+    function skipFlowTask() {
+      flowTaskIndex = (flowTaskIndex + 1) % flowTasks.length;
+      renderFlowTask();
+    }
+
+    // ─── STRIPE / UPGRADE ──────────────────────────────────────────────────
+
+    function showUpgradeModal() {
+      document.getElementById('upgradeModal').classList.add('show');
+    }
+
+    function closeUpgradeModal() {
+      document.getElementById('upgradeModal').classList.remove('show');
+    }
+
+    async function startCheckout() {
+      const btn = document.querySelector('.btn-modal-upgrade');
+      btn.textContent = 'Redirecting to checkout...';
+      btn.disabled = true;
+      try {
+        const res = await fetch('/create-checkout-session', { method: 'POST' });
+        const data = await res.json();
+        if (data.url) window.location.href = data.url;
+        else {
+          btn.textContent = 'Upgrade Now →';
+          btn.disabled = false;
+          alert(data.error || 'Checkout failed. Please try again.');
+        }
+      } catch (e) {
+        btn.textContent = 'Upgrade Now →';
+        btn.disabled = false;
+        alert('Could not connect to checkout. Please try again.');
+      }
+    }
+
+    // ─── UI HELPERS ────────────────────────────────────────────────────────
+
+    function showCelebration(msg) {
+      const toast = document.getElementById('celebrationToast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr + 'T00:00:00');
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.appendChild(document.createTextNode(str || ''));
+      return div.innerHTML;
+    }
+
+    // Enter to save project
+    document.getElementById('newProjectName').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') saveProject();
+      if (e.key === 'Escape') cancelNewProject();
+    });
+
+    // ─── BOOT ──────────────────────────────────────────────────────────────
+    init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Cancelled - TaskFlow Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+
+        .cancel-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 50px;
+            text-align: center;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 90%;
+            position: relative;
+        }
+
+        .cancel-icon {
+            font-size: 4rem;
+            margin-bottom: 30px;
+            color: #f59e0b;
+        }
+
+        .cancel-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #f59e0b;
+            margin-bottom: 20px;
+        }
+
+        .cancel-subtitle {
+            font-size: 1.1rem;
+            color: #6b7280;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .free-features {
+            background: #f0fdf4;
+            border: 2px solid #10b981;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            text-align: left;
+        }
+
+        .free-features h3 {
+            color: #10b981;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+
+        .features-list {
+            list-style: none;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+
+        .features-list li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 5px 0;
+        }
+
+        .features-list li::before {
+            content: "✅";
+            font-size: 1rem;
+        }
+
+        .upgrade-reminder {
+            background: #eff6ff;
+            border: 2px solid #3b82f6;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+
+        .upgrade-reminder h3 {
+            color: #3b82f6;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .pro-features {
+            list-style: none;
+            text-align: left;
+        }
+
+        .pro-features li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 5px 0;
+            color: #6b7280;
+        }
+
+        .pro-features li::before {
+            content: "⭐";
+            font-size: 1rem;
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            margin: 10px;
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(99, 102, 241, 0.4);
+        }
+
+        .cta-button.secondary {
+            background: white;
+            color: #6366f1;
+            border: 2px solid #6366f1;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
+        }
+
+        .cta-button.secondary:hover {
+            background: #f8fafc;
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .cta-button.success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .cta-button.success:hover {
+            box-shadow: 0 12px 30px rgba(16, 185, 129, 0.4);
+        }
+
+        .reassurance {
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 30px 0;
+            color: #065f46;
+        }
+
+        .reassurance h4 {
+            margin-bottom: 10px;
+            color: #10b981;
+        }
+
+        .special-offer {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin: 30px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .special-offer::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(255, 255, 255, 0.1) 10px,
+                rgba(255, 255, 255, 0.1) 20px
+            );
+            animation: shine 3s linear infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%); }
+            100% { transform: translateX(100%) translateY(100%); }
+        }
+
+        .special-offer-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .discount-badge {
+            background: #fbbf24;
+            color: #92400e;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        .timer {
+            font-size: 1.5rem;
+            font-weight: bold;
+            font-family: monospace;
+            margin: 15px 0;
+        }
+
+        @media (max-width: 768px) {
+            .cancel-container {
+                padding: 30px;
+                margin: 20px;
+            }
+            
+            .cancel-title {
+                font-size: 1.8rem;
+            }
+            
+            .cta-button {
+                width: 100%;
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cancel-container">
+        <div class="cancel-icon">😔</div>
+        <h1 class="cancel-title">Payment Cancelled</h1>
+        <p class="cancel-subtitle">
+            No worries at all! You can continue using TaskFlow Pro with our generous free plan. 
+            Upgrade anytime when you're ready for unlimited features.
+        </p>
+
+        <div class="free-features">
+            <h3>🆓 You Still Get With Free Plan:</h3>
+            <ul class="features-list">
+                <li>Up to 3 projects</li>
+                <li>Up to 50 tasks total</li>
+                <li>Basic task management</li>
+                <li>Mobile app access</li>
+                <li>Email support</li>
+            </ul>
+        </div>
+
+        <div class="special-offer">
+            <div class="special-offer-content">
+                <div class="discount-badge">🔥 LIMITED TIME</div>
+                <h3>Come Back Within 24 Hours</h3>
+                <p>Get 20% OFF your first month!</p>
+                <div class="timer" id="offerTimer">23:59:59</div>
+                <p style="font-size: 0.9rem; opacity: 0.9;">Use code: <strong>WELCOME20</strong></p>
+            </div>
+        </div>
+
+        <div class="upgrade-reminder">
+            <h3>⭐ Missing Out On Pro Features:</h3>
+            <ul class="pro-features">
+                <li>Unlimited projects & tasks</li>
+                <li>Team collaboration</li>
+                <li>Advanced analytics</li>
+                <li>Priority support</li>
+                <li>Custom integrations</li>
+                <li>Advanced reporting</li>
+            </ul>
+        </div>
+
+        <div>
+            <a href="app.html" class="cta-button success">Continue with Free Plan</a>
+            <a href="index.html" class="cta-button">Try Upgrading Again</a>
+            <a href="mailto:support@taskflowpro.com" class="cta-button secondary">Questions? Contact Support</a>
+        </div>
+
+        <div class="reassurance">
+            <h4>🛡️ No Risk Guarantee</h4>
+            <p>
+                <strong>30-day money-back guarantee.</strong> Try TaskFlow Pro risk-free. 
+                If you're not completely satisfied, we'll refund your money, no questions asked.
+            </p>
+        </div>
+
+        <div style="margin-top: 30px; padding: 20px; background: rgba(107, 114, 128, 0.1); border-radius: 15px;">
+            <p style="color: #6b7280; font-size: 0.9rem; font-style: italic;">
+                "I started with the free plan and upgraded after just 2 days. The unlimited features are totally worth it!" 
+                <strong>- Sarah M., Pro User</strong>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Track cancellation for analytics
+        function trackCancellation() {
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'checkout_cancel', {
+                    currency: 'USD',
+                    value: 9.99
+                });
+            }
+            console.log('🎯 Payment cancellation tracked');
+        }
+
+        trackCancellation();
+
+        // Countdown timer for special offer
+        function startOfferTimer() {
+            const offerEnd = new Date();
+            offerEnd.setHours(offerEnd.getHours() + 24);
+            
+            const timerEl = document.getElementById('offerTimer');
+            
+            function updateTimer() {
+                const now = new Date().getTime();
+                const timeLeft = offerEnd.getTime() - now;
+                
+                if (timeLeft > 0) {
+                    const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+                    const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                    
+                    timerEl.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                } else {
+                    timerEl.textContent = "Offer Expired";
+                    clearInterval(timerInterval);
+                }
+            }
+            
+            updateTimer();
+            const timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        startOfferTimer();
+
+        // Show retry prompt after some time
+        setTimeout(() => {
+            if (confirm("Still interested in TaskFlow Pro? We can help you with any payment questions!")) {
+                window.location.href = "mailto:support@taskflowpro.com?subject=Payment Help Needed&body=Hi! I tried to upgrade to TaskFlow Pro but had an issue with the payment. Can you help?";
+            }
+        }, 60000); // After 1 minute
+
+        // Add some encouraging messages to console
+        console.log(`
+💡 TASKFLOW PRO TIPS:
+
+Free Plan Limits:
+• 3 projects maximum
+• 50 tasks total
+• Basic features only
+
+Pro Plan Benefits:
+• Unlimited everything
+• Team collaboration
+• Advanced analytics
+• Priority support
+
+Questions? Email: support@taskflowpro.com
+        `);
+    </script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+# Environment variables — NEVER commit
+backend/.env
+.env
+
+# Database file — local data only
+backend/taskflowpro.json
+backend/taskflowpro.db
+
+# Node modules
+node_modules/
+backend/node_modules/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
