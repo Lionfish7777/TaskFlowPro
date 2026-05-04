@@ -10,6 +10,14 @@ backend/taskflowpro.db
 node_modules/
 backend/node_modules/
 
+# Internal workflow docs
+CLAUDE.md
+AGENT.md
+SKILL.md
+
+# Local MCP config
+.mcp.json
+
 # macOS
 .DS_Store
 
