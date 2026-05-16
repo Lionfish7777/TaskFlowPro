@@ -10,10 +10,9 @@ Pro plan at $9.99 a month. Built to run in production.
 
 https://taskflowpro-lionfish.netlify.app
 
-The live demo shows the full UI and product experience. To run TaskFlow Pro
-with live authentication, task management, and Stripe billing, follow the
-Getting Started instructions below. You will need PostgreSQL and a Stripe
-account configured.
+The full product experience is in the demo. Stripe billing, server-side
+enforcement, and the daily focus algorithm require the local setup. Follow
+the Getting Started instructions below.
 
 ---
 
