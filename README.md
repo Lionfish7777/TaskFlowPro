@@ -14,6 +14,10 @@ The full product experience is in the demo. Stripe billing, server-side
 enforcement, and the daily focus algorithm require the local setup. Follow
 the Getting Started instructions below.
 
+## Screenshots
+
+![TaskFlow Pro](screenshots/demo.png)
+
 ---
 
 ## What Makes This a Real Product
