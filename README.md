@@ -56,10 +56,8 @@ bcrypt at 10 salt rounds.
 **Stripe.** Subscription checkout, webhook listener, customer ID stored per
 user.
 
-**Vanilla HTML/CSS/JS.** No frontend framework. Six static pages served
+**HTML/CSS/JS.** No frontend framework. Six static pages served
 from `/public`.
-
-**Railway.** Production deployment target.
 
 ---
 
@@ -221,6 +219,31 @@ limit is reached, which the client uses to surface the upgrade prompt.
 
 ---
 
+## What We Learned
+
+We did not know how Stripe worked before we built this. We did not know what
+server side enforcement really meant at the database layer. We did not fully
+understand why a SQL query is cleaner than forty lines of JavaScript sort logic.
+We built this project to find out.
+
+The webhook signature verification was the hardest lesson and the most valuable.
+express.json() consumes the raw request body before the webhook handler ever sees
+it. We found that out by failing. Earning the fix meant reading the documentation
+until we understood why, not just what. That is the standard we try to hold now.
+
+Server side enforcement taught us to think about trust the way professionals think
+about it. Any user can open devtools and send whatever they want to your API. The
+moment that became real to us we stopped asking where to put the limit and started
+asking what can actually hold it. The database holds it. We are newer to this field
+and we do not want to build things that fall apart under real conditions.
+
+The streak logic and the daily focus algorithm taught us the same lesson from two
+angles. Ask what breaks before you write a line. Let the database do what it is
+built to do. We did not know those things deeply before this project. We know them
+now. That is the only kind of learning we are interested in.
+
+---
+
 ## Status
 
-Active development. Private. Deployed to Railway.
+Public. Active development. Deployed to Netlify.
