@@ -9,6 +9,3 @@ What problem does this solve or what improvement does this make.
 2. Follow setup instructions in README
 3. Verify the change works as described
 
-## Notes
-- No breaking changes
-- Dependencies added or removed: none
