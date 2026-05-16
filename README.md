@@ -244,6 +244,18 @@ now. That is the only kind of learning we are interested in.
 
 ---
 
+## Future Improvements
+
+This is version one and we know exactly where it goes from here. We are not close to done.
+
+- Email notifications for overdue and due today tasks. The algorithm already knows what matters. Getting that information to users without requiring them to open the app is the next step.
+- OAuth sign in. Bcrypt is the right foundation. Google sign in is what users actually want and we want to give it to them.
+- Team projects. The schema supports one user today. Shared projects and task assignment is where this becomes a real team tool.
+- Mobile. A React Native wrapper would put the daily focus feature in someone's pocket on the way to work. That is where it belongs.
+- Integration tests. We built the logic correctly. We want to prove it with tests that hit a real database, not mocks.
+
+---
+
 ## Status
 
 Public. Active development. Deployed to Netlify.
