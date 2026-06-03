@@ -242,6 +242,11 @@ angles. Ask what breaks before you write a line. Let the database do what it is
 built to do. We did not know those things deeply before this project. We know them
 now. That is the only kind of learning we are interested in.
 
+Claude Code was part of how we built this. We used it to debug errors we had not
+seen before, pressure test our architecture decisions, and accelerate our
+understanding of parts of the stack that were new to us. Every solution it helped
+us reach, we validated and understood before it went in.
+
 ---
 
 ## Future Improvements
